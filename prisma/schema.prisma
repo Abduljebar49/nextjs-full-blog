@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  password  String
+  username  String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  posts     Post[] // One-to-many relationship with Post
+  comments  Comment[]
+}
+
+model Post {
+  id          Int       @id @default(autoincrement())
+  title       String    @unique
+  content     String
+  isPublished Boolean   @default(false)
+  author      User      @relation(fields: [authorId], references: [id]) // Many-to-one relationship with User
+  authorId    Int
+  category    Category? @relation(fields: [categoryId], references: [id]) // Many-to-one relationship with Category
+  categoryId  Int?
+  comments    Comment[] // One-to-many relationship with Comment
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  publishedAt DateTime?
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  posts       Post[] // One-to-many relationship with Post
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  post      Post     @relation(fields: [postId], references: [id]) // Many-to-one relationship with Post
+  postId    Int
+  author    User?    @relation(fields: [authorId], references: [id]) // Optional many-to-one relationship with User
+  authorId  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
